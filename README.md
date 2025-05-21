@@ -1,0 +1,2 @@
+# analisa-turunan-parsial
+pythonnn
