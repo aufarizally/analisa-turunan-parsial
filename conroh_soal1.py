@@ -1,47 +1,45 @@
 import sympy as sp
 import streamlit as st
 
-
-
-
+# Simbol
 x, y = sp.symbols('x y')
 
+# Parameter waktu
+R = 0.15  # Allowance
+I = 3     # Waktu tambahan tetap
 
-R = 0.15  
-I = 3     
-
-
+# Waktu normal dan waktu baku
 Tn = 0.7 * x + 0.3 * y
+Ts = Tn * (1 + R) + I
 
+# Turunan parsial
+dTs_dx = sp.simplify(sp.diff(Ts, x))
+dTs_dy = sp.simplify(sp.diff(Ts, y))
 
-Ts = Tn * (1 + R) + I  # Ts = (0.7x + 0.3y)(1.15) + 3
+# Tampilan di Streamlit
+st.title("Analisis Turunan Parsial Waktu Baku Produksi")
 
+st.subheader("Fungsi Waktu Baku:")
+st.latex(f"T_s = ({sp.latex(Tn)}) \\cdot (1 + {R}) + {I}")
 
-dTs_dx = sp.diff(Ts, x)
-dTs_dy = sp.diff(Ts, y)
+st.subheader("Turunan Parsial:")
+st.latex(f"\\frac{{\\partial T_s}}{{\\partial x}} = {sp.latex(dTs_dx)}")
+st.latex(f"\\frac{{\\partial T_s}}{{\\partial y}} = {sp.latex(dTs_dy)}")
 
+# Input pengguna
+x_val = st.number_input("Masukkan waktu kerja mesin (x) [menit]:", value=10)
+y_val = st.number_input("Masukkan waktu kerja operator (y) [menit]:", value=5)
 
-dTs_dx = sp.simplify(dTs_dx)
-dTs_dy = sp.simplify(dTs_dy)
-
-
-print("Turunan parsial waktu baku terhadap x (waktu kerja mesin):")
-print("∂Ts/∂x =", dTs_dx)
-
-print("\nTurunan parsial waktu baku terhadap y (waktu kerja operator):")
-print("∂Ts/∂y =", dTs_dy)
-
-
-x_val = 10
-y_val = 5
-
+# Evaluasi
 Ts_val = Ts.subs({x: x_val, y: y_val})
 dTs_dx_val = dTs_dx.subs({x: x_val, y: y_val})
 dTs_dy_val = dTs_dy.subs({x: x_val, y: y_val})
 
-print(f"\nEvaluasi waktu baku di titik x = {x_val} menit, y = {y_val} menit:")
-print(f"Ts = {Ts_val} menit")
+# Tampilkan hasil evaluasi
+st.subheader("Evaluasi di Titik:")
+st.write(f"x = {x_val} menit, y = {y_val} menit")
+st.write(f"Waktu Baku (Ts) = {Ts_val} menit")
 
-print("\nEvaluasi turunan di titik tersebut:")
-print(f"∂Ts/∂x = {dTs_dx_val} → dampak perubahan waktu mesin")
-print(f"∂Ts/∂y = {dTs_dy_val} → dampak perubahan waktu operator")
+st.subheader("Evaluasi Turunan Parsial di Titik Tersebut:")
+st.write(f"∂Ts/∂x = {dTs_dx_val} → dampak perubahan waktu mesin")
+st.write(f"∂Ts/∂y = {dTs_dy_val} → dampak perubahan waktu operator")
