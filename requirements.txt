@@ -1,2 +1,5 @@
-streamlit 
 sympy
+streamlit
+numpy
+matplotlib
+mpl_toolkits
