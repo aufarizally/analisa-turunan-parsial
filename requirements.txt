@@ -2,4 +2,3 @@ sympy
 streamlit
 numpy
 matplotlib
-mpl_toolkits
