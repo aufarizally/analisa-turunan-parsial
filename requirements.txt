@@ -1,4 +1,3 @@
-sympy
 streamlit
-numpy
 matplotlib
+pandas
