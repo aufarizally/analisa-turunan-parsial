@@ -1,10 +1,11 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 # Fungsi perhitungan
 def total_waktu_produksi(x, y):
-    return 2 * x**2 + 3 * x * y + y**2
+    return 2 * x*2 + 3 * x * y + y*2
 
 def turunan_parsial(x, y):
     dT_dx = 4 * x + 3 * y
@@ -86,7 +87,7 @@ st.write(f"*Unit Mesin yang Dirakit (x = {x} jam):* {unit_mesin_harian:.0f} unit
 st.markdown("---")
 st.subheader("📌 Contoh Interpretasi")
 st.markdown(f"""
-Jika terdapat *{jumlah_pekerja} orang pekerja*, masing-masing bekerja selama **{jam_kerja_per_hari} jam per hari**, 
+Jika terdapat *{jumlah_pekerja} orang pekerja, masing-masing bekerja selama **{jam_kerja_per_hari} jam per hari*, 
 dan waktu baku perakitan mobil adalah *{wb:.2f} jam*, maka dalam sehari dapat diselesaikan sekitar 
 *{unit_mobil_harian:.2f} unit mobil lengkap*.
 
@@ -94,30 +95,39 @@ Sementara itu, untuk proses perakitan mesin yang membutuhkan *{x} jam per unit*,
 sekitar *{unit_mesin_harian:.0f} unit mesin per hari*.
 """)
 
-# ===== Tambahan: Tabel Simulasi Dinamis =====
+# =======================
+# Tambahan: Tabel Simulasi Variasi Input
+# =======================
 st.markdown("---")
-st.subheader("📋 Tabel Simulasi Output Berdasarkan Variasi Input")
+st.subheader("📋 Tabel Simulasi Variasi Input")
 
-# Simulasi berbagai kombinasi
-toleransi_list = [0.05, 0.10, 0.15, 0.20, 0.25]
-pekerja_list = [5, 10, 15, 20]
-jam_kerja_list = [6, 8, 10, 12]
+# Range variasi simulasi
+toleransi_range = np.arange(0, 31, 5)       # 0,5,10,...,30%
+pekerja_range = np.arange(5, 51, 5)         # 5,10,...,50 orang
+jam_kerja_range = np.arange(4, 13, 2)       # 4,6,8,10,12 jam kerja
 
-simulasi_data = []
+data_simulasi = []
 
-for tol in toleransi_list:
-    for pekerja in pekerja_list:
-        for jam_kerja in jam_kerja_list:
-            wb_simulasi = waktu_baku(waktu_total, tol)
+for tol in toleransi_range:
+    for pekerja in pekerja_range:
+        for jam_kerja in jam_kerja_range:
+            wb_sim = waktu_baku(waktu_total, tol/100)
             total_jam = pekerja * jam_kerja
-            unit_harian = total_jam / wb_simulasi if wb_simulasi > 0 else 0
-            simulasi_data.append({
-                "Toleransi": f"{int(tol*100)}%",
-                "Pekerja": pekerja,
-                "Jam Kerja": jam_kerja,
-                "Waktu Baku (jam)": round(wb_simulasi, 2),
-                "Produksi Mobil/Hari": round(unit_harian, 2)
+            unit_harian = total_jam / wb_sim if wb_sim > 0 else 0
+            
+            data_simulasi.append({
+                "Toleransi (%)": tol,
+                "Jumlah Pekerja": pekerja,
+                "Jam Kerja per Hari": jam_kerja,
+                "Waktu Baku (jam)": round(wb_sim, 2),
+                "Total Jam Kerja (jam)": total_jam,
+                "Unit Mobil per Hari": round(unit_harian, 2)
             })
 
-df_simulasi = pd.DataFrame(simulasi_data)
-st.dataframe(df_simulasi)
+df_simulasi = pd.DataFrame(data_simulasi)
+
+st.dataframe(df_simulasi.style.format({
+    "Waktu Baku (jam)": "{:.2f}",
+    "Unit Mobil per Hari": "{:.2f}",
+    "Total Jam Kerja (jam)": "{:.0f}"
+}))
