@@ -574,4 +574,4 @@ elif menu == "Analisis Terintegrasi":
         recommendations.append("📈 Efisiensi operasional rendah. Fokus pada perbaikan proses dan eliminasi waste.")
     
     if not recommendations:
-    recommendations.append("✅ Semua indikator dalam kondisi baik.")
+        recommendations.append("✅
