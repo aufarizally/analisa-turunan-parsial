@@ -556,22 +556,93 @@ elif menu == "Analisis Terintegrasi":
     fig_integrated.update_layout(height=600, showlegend=True, title_text="Dashboard Analisis Terintegrasi")
     st.plotly_chart(fig_integrated, use_container_width=True)
     
-    # Rekomendasi strategis
-    st.subheader("💡 Rekomendasi Strategis")
-    
-    recommendations = []
-    
-    if capacity_utilization > 90:
-        recommendations.append("🚨 Kapasitas produksi hampir maksimal. Pertimbangkan ekspansi atau investasi mesin baru.")
-    
-    if queue_metrics and queue_metrics['utilization'] > 0.8:
-        recommendations.append("⚠️ Tingkat antrian tinggi. Pertimbangkan optimasi proses atau penambahan shift.")
-    
-    if total_inventory_cost > monthly_profit:
-        recommendations.append("💰 Biaya persediaan terlalu tinggi. Review kebijakan EOQ dan safety stock.")
-    
-    if overall_efficiency < 70:
-        recommendations.append("📈 Efisiensi operasional rendah. Fokus pada perbaikan proses dan eliminasi waste.")
-    
-    if not recommendations:
-        recommendations.append("✅fawfvawfawf")
+  # Replace the existing subplot creation and trace additions block in "Analisis Terintegrasi" section with this corrected snippet:
+
+fig_integrated = make_subplots(
+    rows=2, cols=2,
+    subplot_titles=[
+        "Profit vs Biaya", 
+        "Level Persediaan", 
+        "Kinerja Antrian", 
+        "Efisiensi Operasional"
+    ],
+    specs=[
+        [{"type": "xy"}, {"type": "xy"}],
+        [{"type": "indicator"}, {"type": "indicator"}]
+    ]
+)
+
+# Grafik 1: Profit Analysis
+profit_per_unit = product_data["harga_jual"] - product_data["biaya_produksi"]
+monthly_profit = monthly_demand * profit_per_unit
+
+fig_integrated.add_trace(
+    go.Bar(
+        x=["Revenue", "Cost", "Profit"],
+        y=[
+            monthly_demand * product_data["harga_jual"],
+            monthly_demand * product_data["biaya_produksi"],
+            monthly_profit
+        ],
+        name="Financial"
+    ),
+    row=1, col=1
+)
+
+# Grafik 2: Inventory Level (contoh untuk bahan utama)
+if bahan_baku_analysis:
+    main_material = bahan_baku_analysis[0]
+    days = list(range(1, 31))
+    inventory_sim = [main_material["EOQ (kg)"] - (i * main_material["Kebutuhan Tahunan (kg)"]/365) for i in days]
+
+    fig_integrated.add_trace(
+        go.Scatter(
+            x=days, y=inventory_sim, mode='lines', name="Inventory Level"
+        ),
+        row=1, col=2
+    )
+
+# Grafik 3: Queue Performance Indicator
+if queue_metrics:
+    fig_integrated.add_trace(
+        go.Indicator(
+            mode="gauge+number",
+            value=queue_metrics['utilization'] * 100,
+            title={"text": "Utilisasi (%)"},
+            gauge={
+                'axis': {'range': [None, 100]},
+                'bar': {'color': "darkblue"},
+                'steps': [
+                    {'range': [0, 50], 'color': "lightgray"},
+                    {'range': [50, 80], 'color': "gray"}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 90
+                }
+            }
+        ),
+        row=2, col=1
+    )
+
+# Grafik 4: Overall Efficiency Indicator
+overall_efficiency = (capacity_utilization + queue_metrics['utilization'] * 100) / 2 if queue_metrics else capacity_utilization
+
+fig_integrated.add_trace(
+    go.Indicator(
+        mode="gauge+number+delta",
+        value=overall_efficiency,
+        delta={'reference': 80},
+        title={"text": "Efisiensi Keseluruhan (%)"},
+        gauge={'axis': {'range': [None, 100]}}
+    ),
+    row=2, col=2
+)
+
+fig_integrated.update_layout(
+    height=600,
+    showlegend=True,
+    title_text="Dashboard Analisis Terintegrasi"
+)
+
